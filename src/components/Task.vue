@@ -7,17 +7,17 @@
       </div>
       <!-- form -->
       <form class="form" @submit.prevent="addTask">
-        <input type="text" v-model.trim="task" placeholder="New Task" />
+        <input type="text" v-model.trim="task" placeholder="New Task"/>
         <button><i class="fas fa-plus"></i></button>
       </form>
       <!-- task lists -->
       <div class="taskItems">
         <ul>
-          <li v-for="task in tasks" :key="task.id">
+          <li v-for="task in getTaskList" :key="task.id">
             <button
-              @click="toggleCompleted(task.id)"
-              class="taskItemsTitle toggle"
-              :class="{ 'toggle-completed': task.completed }"
+                @click="toggleCompleted(task.id)"
+                class="taskItemsTitle toggle"
+                :class="{ 'toggle-completed': task.completed }"
             >
               <i class="far fa-circle"></i> {{ task.title }}
             </button>
@@ -32,38 +32,47 @@
       </div>
       <!-- pending task -->
       <div class="pendingTasks">
-        <span>Pending Tasks: {{ tasks?.filter((item) => !item.completed).length }}</span>
+        <span>Pending Tasks: {{ getTaskList?.filter((item) => !item.completed).length }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import {mapGetters} from "vuex";
+import {ADD_TASK, CHANGE_STATUS, CLEAR_TASKS, REMOVE_TASK} from "@/store/type";
+
 export default {
   name: "Task",
-  props: ["tasks"],
   data() {
     return {
       task: "",
     };
   },
+  computed: {
+    ...mapGetters(['getTaskList']),
+  },
+  mounted() {
+    console.log(this.getTaskList)
+  },
   methods: {
     clearAll(type) {
-      this.$emit("clearAllTasks", type);
+      this.$store.commit(CLEAR_TASKS, type)
     },
     addTask() {
-      this.$emit("addNewTask", {
+      const newTask = {
         id: Math.random(),
         title: this.task,
         completed: false,
-      });
-      this.task = "";
+      }
+
+      this.$store.commit(ADD_TASK, newTask)
     },
     deleteTask(id) {
-      this.$emit("removeTask", id);
+      this.$store.commit(REMOVE_TASK, id)
     },
     toggleCompleted(id) {
-      this.$emit("changeStatusTask", id);
+      this.$store.commit(CHANGE_STATUS, id)
     },
   },
 };
